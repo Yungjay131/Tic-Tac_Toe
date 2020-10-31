@@ -3,18 +3,15 @@ package com.slyworks.tic_tac_toe;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -93,7 +90,7 @@ private  controller control =  new controller();
               if(isAiToPlay) {
                   Handler mainHandler = new Handler(getMainLooper());
                   mainHandler.post(()->{
-                      SystemClock.sleep(1000);
+                      SystemClock.sleep(700);
                       control.comPlay(view2, view, array_ids, MainActivity.this, combinationsArray);
                   });
               }
@@ -120,7 +117,7 @@ private  controller control =  new controller();
                 selection.show(getSupportFragmentManager(),"dialog2");
                 return true;
             case R.id.action_settings:
-                  startActivity(new Intent());
+                  //startActivity(new Intent());
                   return true;
             default:
                 return super.onOptionsItemSelected(item);

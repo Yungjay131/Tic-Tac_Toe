@@ -3,11 +3,13 @@ package com.slyworks.tic_tac_toe;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import org.w3c.dom.Text;
 import java.util.Random;
 
@@ -149,12 +151,21 @@ return  isAiToPlay;
                     AI_marker_count++;
                 }
 
+                /*refactoring conditional block
                 if ((non_empty_spots == 3) && (user_marker_count == 3)) {
                     //declare user winner
                     return winner = "USER";
                 } else if ((non_empty_spots == 3) && (AI_marker_count == 3)) {
                     //declare AI winner
                     return winner = "AI";
+                }*/
+
+                if(non_empty_spots == 3){
+                    if(user_marker_count == 3){
+                        return winner = "USER";
+                    }else if(AI_marker_count == 3){
+                        return winner = "AI";
+                    }
                 }
             }
         }
