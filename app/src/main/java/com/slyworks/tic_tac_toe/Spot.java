@@ -7,5 +7,6 @@ public enum Spot {
     TWO_FILLED_AI,
     TWO_FILLED_USER,
     CENTER,
-    RANDOM;
+    RANDOM,
+    NOT_SET
 }

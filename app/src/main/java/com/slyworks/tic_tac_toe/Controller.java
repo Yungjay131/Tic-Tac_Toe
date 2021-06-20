@@ -30,10 +30,11 @@ class Controller {
 
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
-    private int mSpotToBePlayedTo;
     private boolean mIsAIToPlay = false;
 
     private static Controller instance;
+
+    private boolean mIsResetting;
     //endregion
 
     public static Controller getInstance(Context context, View rootView, int[][] combinationOfThrees, int[] view_ids){
@@ -98,74 +99,80 @@ class Controller {
         mMainHandler.post(()->{
             SystemClock.sleep(700);
 
-            checkAppropriateSpotToPlayTo();
-
-            play(getSpotToBePlayedTo(), getAIMarker());
+            play(checkAppropriateSpotToPlayTo(), getAIMarker());
 
             checkIfThereIsAWinner();
         } );
     }
    //region AIToPlay() helper methods
-    private void  setSpotToBePlayedTo(int spot_id){mSpotToBePlayedTo = spot_id;}
-    private int getSpotToBePlayedTo(){return mSpotToBePlayedTo; }
-    private Spot checkAppropriateSpotToPlayTo() {
-        int markedSpots = 0;
-        int userMarkedSpots = 0;
-        int AIMarkedSpots = 0;
+    private int checkAppropriateSpotToPlayTo(){
+        //returning the id of the appropriate place to play to
+        int freeSpotsPerArray = 0;
+        int userMarkedSpotsPerArray = 0;
+        int AIMarkedSpotsPerArray = 0;
 
-        Spot spot = null;
+        int fullIndex = -1;
 
-        outer:for(int i=0; i < mCombinationsOfThrees.length;i++){
+        Spot spot = Spot.NOT_SET;
 
-              inner:for(int j=0; j < 3; j++){
-                  TextView textView = mRootView.findViewById(mCombinationsOfThrees[i][j]);
+        outer:for(int i=0 ; i < mCombinationsOfThrees.length ; i++){
+            //for each of the inner arrays of 3, get number of free spots, AI and user marked spots
+            inner:for(int j=0 ; j < 3; j++){
+               TextView textView = mRootView.findViewById(mCombinationsOfThrees[i][j]);
 
-                  //for individual combination of 3
-                  if(!textView.getText().toString().isEmpty()){
-                      markedSpots++;
-                      if(textView.getText().toString().equals(getAIMarker()))
-                          AIMarkedSpots++;
-                      else
-                          userMarkedSpots++;
+               if(textView.getText().toString().isEmpty()){
+                   freeSpotsPerArray++;
+               }else if(!textView.getText().toString().isEmpty()){
+                   if(textView.getText().toString().equals(getAIMarker())) AIMarkedSpotsPerArray++;
+                   else userMarkedSpotsPerArray++;
+               }
 
-                  }
+               //at the end of each inner 3 iterations
+                if(j == 2){
+                    if(AIMarkedSpotsPerArray == 2 && freeSpotsPerArray == 1){
+                        for(int k=0 ; k < 3 ; k++){
+                            TextView textView2 = mRootView.findViewById(mCombinationsOfThrees[i][k]);
 
-                  if(AIMarkedSpots == 2){
-                      inner_one:for(int k=0;k<3;k++){
-                          TextView textView2 = mRootView.findViewById(mCombinationsOfThrees[i][k]);
+                            if(textView2.getText().toString().isEmpty()){
+                                fullIndex = mCombinationsOfThrees[i][k];
+                                return fullIndex;
+                            }
+                        }
+                    }else if( userMarkedSpotsPerArray == 2 && freeSpotsPerArray == 1){
+                        for(int k=0 ; k < 3 ; k++){
+                            TextView textView2 = mRootView.findViewById(mCombinationsOfThrees[i][k]);
 
-                          if(textView2.getText().toString().isEmpty()){
-                               setSpotToBePlayedTo(mCombinationsOfThrees[i][k]);
-                               spot = Spot.TWO_FILLED_AI;
-                               break outer;
-                          }
-                      }
-                  }else if(userMarkedSpots == 2){
-                      inner_two:for(int k=0; k<3; k++){
-                          TextView textView2 = mRootView.findViewById(mCombinationsOfThrees[i][k]);
+                            if(textView2.getText().toString().isEmpty()){
+                                fullIndex = mCombinationsOfThrees[i][k];
+                                spot = Spot.TWO_FILLED_USER;
+                            }
+                        }
+                    } else {
+                       TextView textView3 = mRootView.findViewById(mView_ids[4]);
+                       if(textView3.getText().toString().isEmpty() && spot != Spot.TWO_FILLED_USER){
+                           fullIndex = mView_ids[4];
+                           spot = Spot.CENTER;
+                       }
+                    }
+                }
 
-                          if(textView2.getText().toString().isEmpty()){
-                              setSpotToBePlayedTo(mCombinationsOfThrees[i][k]);
-                              spot = Spot.TWO_FILLED_USER;
-                              break outer;
-                          }
-                      }
-                  }else if( ((TextView)mRootView.findViewById(mView_ids[4])).getText().toString().isEmpty() ){
-                      //return center spot
-                      setSpotToBePlayedTo(mView_ids[4]);
-                     spot =  Spot.CENTER;
-                     break outer;
 
-                  }else{
-                    setSpotToBePlayedTo(getRandomSpotGenerator());
-                    spot =  Spot.RANDOM;
-                    break outer;
-                  }
-              }
-          }
+                //at the overall end
+                if(i == mCombinationsOfThrees.length-1 && j == 2){
+                    if(spot != Spot.NOT_SET) return fullIndex;
+                    else {
+                        fullIndex = getRandomSpotGenerator();
+                        spot = Spot.RANDOM;
+                    }
+                }
+            }
 
-          return spot;
+            freeSpotsPerArray = 0; userMarkedSpotsPerArray = 0; AIMarkedSpotsPerArray = 0;
+        }
+
+        return fullIndex;
     }
+
     private int getRandomSpotGenerator(){
         Random outerArrayRand = new Random();
         Random innerArrayRand = new Random();
@@ -175,8 +182,7 @@ class Controller {
 
         TextView textView = mRootView.findViewById(mCombinationsOfThrees[outerArrayIndex][innerArrayIndex]);
 
-        if( !textView.getText().toString().isEmpty() )
-            getRandomSpotGenerator();
+        if( !textView.getText().toString().isEmpty() ) return getRandomSpotGenerator();
 
         return mCombinationsOfThrees[outerArrayIndex][innerArrayIndex];
     }
@@ -230,4 +236,7 @@ class Controller {
     }
     private void displayMessage(String message){ Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show(); }
     private void displaySnackBar(String message){ Snackbar.make(mRootView, message, Snackbar.LENGTH_LONG).show(); }
+
+    public void  setResetStatus(boolean status){ mIsResetting = status; }
+    public boolean isStillResetting(){  return mIsResetting; }
 }

@@ -54,6 +54,8 @@ public class selection_dialog extends DialogFragment {
 
             }//end of conditionals
             //Toast.makeText(getContext(), getUserMarker(), Toast.LENGTH_LONG).show();
+
+            mController.setResetStatus(false);
             dismiss();
 
         });

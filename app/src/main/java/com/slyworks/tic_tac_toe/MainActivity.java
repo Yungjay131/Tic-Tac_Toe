@@ -109,9 +109,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch(item.getItemId()){
             case R.id.action_reload:
+                if(mController.isStillResetting()) return true;
+
+                //set in selection_dialog class
+                mController.setResetStatus(true);
+
                 mController.resetBoard();
                 selection_dialog selection = new selection_dialog();
                 selection.show(getSupportFragmentManager(),"dialog2");
+
+
                 return true;
             case R.id.action_settings:
                   //startActivity(new Intent());
