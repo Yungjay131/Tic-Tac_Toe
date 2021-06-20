@@ -11,61 +11,73 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
-
-import static com.slyworks.tic_tac_toe.controller.getuserMarker;
 
 public class selection_dialog extends DialogFragment {
+    //region Vars
+    private RadioGroup mRadioGroup;
+    private RadioButton mRadioButtonX,mRadioButtonO;
 
-private RadioGroup mRadioGroup;
-private RadioButton mRadioButtonX,mRadioButtonO;
-
-
-    private controller control = new controller();
-
+    private Controller mController;
+    private int mId = -1;
+    //endregion
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        return initViews();
+    }
+
+    private Dialog initViews(){
         final AlertDialog.Builder builder =new  AlertDialog.Builder(getActivity());
         LayoutInflater lf = getActivity().getLayoutInflater();
         final View dialogView = lf.inflate(R.layout.selection_dialog_layout,null);
-
 
         mRadioGroup = dialogView.findViewById(R.id.radioGroup1);
         mRadioButtonO = dialogView.findViewById(R.id.radioButtonO);
         mRadioButtonX = dialogView.findViewById(R.id.radioButtonX);
         Button button1 = dialogView.findViewById(R.id.button1);
 
+        mController = Controller.getInstance();
 
-        //setting OnclickListener for the RadioGroup in general
-
-
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                    int id = mRadioGroup.getCheckedRadioButtonId();
-                    RadioButton rb = dialogView.findViewById(mRadioGroup.getCheckedRadioButtonId());
-
-                    if (id == mRadioButtonO.getId()) {
-                        control.setuserMarker("O");
-                        control.setAIMarker("X");
-
-                    }else if (id == mRadioButtonX.getId()){
-                        control.setuserMarker("X");
-                        control.setAIMarker("O");
-
-                    }
-                Toast.makeText(getContext(), getuserMarker(), Toast.LENGTH_LONG).show();
-                    dismiss();
-
-
+        button1.setOnClickListener( (v)->{
+            mId = mRadioGroup.getCheckedRadioButtonId();
+            //check incase no checkButton was checked
+            if(mId == -1){
+                return;
             }
+            if (mId == mRadioButtonO.getId()) {
+                mController.setUserMarker("O");
+                mController.setAIMarker("X");
+
+            }else if (mId == mRadioButtonX.getId()){
+                mController.setUserMarker("X");
+                mController.setAIMarker("O");
+
+            }//end of conditionals
+            //Toast.makeText(getContext(), getUserMarker(), Toast.LENGTH_LONG).show();
+            dismiss();
+
         });
 
         builder.setView(dialogView);
-       return  builder.create();
+
+        Dialog dialog  = builder.create();
+
+        setCancelable(false);
+
+        return  dialog;
 
 
+    }
+
+    @Override
+    public void setCancelable(boolean cancelable) {
+        super.setCancelable(cancelable);
+    }
+
+
+    @Override
+    public void setEnterTransition(@Nullable Object transition) {
+        //TODO:find code for this method
+        super.setEnterTransition(transition);
     }
 }
